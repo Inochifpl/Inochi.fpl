@@ -1,0 +1,200 @@
+jQuery(document).ready(function($) {
+    $('#message').on('shown.bs.modal');
+    $('.part-slick').slick({
+        dots: false,
+        infinite: false,
+        speed: 300,
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        arrows: true,
+        autoplay: true,
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: 3,
+                }
+            },
+            {
+                breakpoint: 600,
+                settings: {
+                    slidesToShow: 2,
+                    arrows: false,
+                    dots: true,
+                }
+            },
+            {
+                breakpoint: 480,
+                settings: {
+                    slidesToShow: 2,
+                    arrows: false,
+                    dots: true,
+                }
+            }
+            // You can unslick at a given breakpoint now by adding:
+            // settings: "unslick"
+            // instead of a settings object
+        ]
+    });
+    $('.cap-items-slick,.cers-slick').slick({
+        dots: true,
+        infinite: false,
+        speed: 300,
+        slidesToShow: 2,
+        slidesToScroll: 1,
+        arrows: false,
+        autoplay: true,
+        responsive: [
+            {
+                breakpoint: 767,
+                settings: {
+                    slidesToShow: 2,
+                }
+            }
+            // You can unslick at a given breakpoint now by adding:
+            // settings: "unslick"
+            // instead of a settings object
+        ]
+    });
+    $('.cers').slick({
+        dots: true,
+        infinite: false,
+        speed: 300,
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        arrows: false,
+        autoplay: true,
+        responsive: [
+            {
+                breakpoint: 767,
+                settings: {
+                    slidesToShow: 2,
+                }
+            }
+            // You can unslick at a given breakpoint now by adding:
+            // settings: "unslick"
+            // instead of a settings object
+        ]
+    });
+
+    $('.slider-slick').slick({
+        dots: true,
+        arrows: false,
+        autoplay: true,
+        // pauseOnHover: true,
+        fade:true,
+        speed: 200,
+        adaptiveHeight: true
+    });
+    $('.slider-for').slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        arrows: true,
+        fade: true,
+        asNavFor: '.slider-nav',
+        infinite: false,
+        adaptiveHeight: true
+    });
+    $('.slider-nav').slick({
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        asNavFor: '.slider-for',
+        dots: false,
+        centerMode: false,
+        arrows: false,
+        focusOnSelect: true,
+        infinite: false,
+    });
+    // $(window).on('load', function () {
+        load_store_filter($('.store-locators-parent').find(":selected").val());
+        load_store($('.store-type.active').attr('type-id'), 'all');
+    // });
+    $('.store-locators-parent').on('change', function () {
+        if ($(this).find(":selected").val() == 0) {
+            load_store($('.store-type.active').attr('type-id'), 'all');
+        }
+        load_store_filter($(this).find(":selected").val());
+    });
+    $('.store-type').on('click', function(){
+        $('.store-type').removeClass('active');
+        $(this).addClass('active');
+        load_store($(this).attr('type-id'), $('.store-locators.active').find(":selected").val());
+    });
+    $('.store-locators-selector select').on('change', function () {
+        let type_id = $('.store-type.active').attr('type-id');
+        let city = $('.store-locators.active').find(":selected").val();
+        load_store(type_id, city);
+    });
+
+    $(document).on('click', '.map-button span', function(){
+        let mapID = $(this).attr('map-id');
+        $('.mapouter').removeClass('active');
+        $('#' + mapID).addClass('active');
+    });
+
+    $('.message-content').readmore({
+        collapsedHeight: 302,
+        lessLink: '<a href="#">Read less</a>'
+    });
+    $('.message-button').on('click', function(){
+        $('a[aria-controls="rmjs-1"]').trigger('click');
+        return false;
+    });
+    $('.navbar-toggler').on('click', function(){
+        $('.overlay, #main-menu').addClass('active');
+    });
+    $('.overlay,.menu-close').on('click', function(){
+        $('.overlay, #main-menu').removeClass('active');
+    });
+    $('.mobile-expend').on('click', function(){
+        $(this).closest('.menu-item').find('.dropdown-menu').toggleClass('active');
+        var text = $(this).text();
+        $(this).text( text == "+" ? "-" : "+");
+    });
+    function load_store(type_id, city) {
+        var city = city;
+        if (city == 'all') {
+            city = 0;
+        }
+        $.ajax({
+            type : 'post',
+            url : '/wp-admin/admin-ajax.php',
+            data : {
+                action: 'load_stores',
+                type_id: type_id,
+                city: city,
+            },
+            beforeSend: function(){
+                $('.ajax-loading').addClass('active');
+            },
+            success: function(response) {
+                $('.store-listing-inner').html(response);
+                $('.ajax-loading').removeClass('active');
+            },
+            error: function( jqXHR, textStatus, errorThrown ){
+                console.log( 'The following error occured: ' + textStatus, errorThrown );
+            }
+        })
+        return false;
+    }
+
+    /**
+     * 
+     * @param {Animation} parent 
+     */
+    if ($('.slide-item')[0]) {
+        setTimeout(function () {
+            $('.slide-item').addClass('zout');
+        }, 500);
+    }
+    
+
+    // AOS.init();
+    function load_store_filter(parent) {
+        if ($('.store-locators')[0]) {
+            $('.store-locators').removeClass('active');
+            $('select[parent="' + parent + '"]').addClass('active');
+        }
+        
+    }
+});
